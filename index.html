@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工具箱 | Geek Toolbox</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-card: #21262d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent: #58a6ff;
+            --accent-hover: #79c0ff;
+            --border: #30363d;
+            --success: #3fb950;
+            --warning: #d29922;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'SF Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 40px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: white;
+            box-shadow: 0 0 40px rgba(102, 126, 234, 0.4);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #58a6ff, #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+        
+        .matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: 0 8px 30px rgba(88, 166, 255, 0.15);
+        }
+        
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+        
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--accent);
+        }
+        
+        .card-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        
+        .tag {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            border: 1px solid var(--border);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8rem; }
+            .container { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix" class="matrix-rain"></canvas>
+    
+    <div class="container">
+        <header>
+            <div class="avatar">👨‍💻</div>
+            <h1>我的工具箱</h1>
+            <p class="subtitle">// 极客的个人工具集合</p>
+        </header>
+        
+        <div class="grid">
+            <!-- 工具卡片 -->
+            <a href="https://weather.com" target="_blank" class="card">
+                <div class="card-icon">🌤️</div>
+                <div class="card-title">天气查询</div>
+                <div class="card-desc">实时天气与天气预报</div>
+                <div class="card-tags">
+                    <span class="tag">实用</span>
+                    <span class="tag">天气</span>
+                </div>
+            </a>
+            
+            <a href="https://translate.google.com" target="_blank" class="card">
+                <div class="card-icon">🌐</div>
+                <div class="card-title">在线翻译</div>
+                <div class="card-desc">多语言翻译工具</div>
+                <div class="card-tags">
+                    <span class="tag">效率</span>
+                    <span class="tag">语言</span>
+                </div>
+            </a>
+            
+            <a href="https://crontab.guru" target="_blank" class="card">
+                <div class="card-icon">⏰</div>
+                <div class="card-title">Cron 表达式</div>
+                <div class="card-desc">在线 Cron 定时任务生成器</div>
+                <div class="card-tags">
+                    <span class="tag">开发</span>
+                    <span class="tag">工具</span>
+                </div>
+            </a>
+            
+            <a href="https://regex101.com" target="_blank" class="card">
+                <div class="card-icon">🔍</div>
+                <div class="card-title">正则测试</div>
+                <div class="card-desc">在线正则表达式测试工具</div>
+                <div class="card-tags">
+                    <span class="tag">开发</span>
+                    <span class="tag">代码</span>
+                </div>
+            </a>
+            
+            <a href="https://jsonformatter.org" target="_blank" class="card">
+                <div class="card-icon">📋</div>
+                <div class="card-title">JSON 格式化</div>
+                <div class="card-desc">在线 JSON 解析与美化</div>
+                <div class="card-tags">
+                    <span class="tag">开发</span>
+                    <span class="tag">数据</span>
+                </div>
+            </a>
+            
+            <a href="https://tinyurl.com" target="_blank" class="card">
+                <div class="card-icon">🔗</div>
+                <div class="card-title">短链接</div>
+                <div class="card-desc">URL 短链接生成服务</div>
+                <div class="card-tags">
+                    <span class="tag">效率</span>
+                    <span class="tag">链接</span>
+                </div>
+            </a>
+            
+            <a href="https://github.com" target="_blank" class="card">
+                <div class="card-icon">🐙</div>
+                <div class="card-title">GitHub</div>
+                <div class="card-desc">代码托管与协作平台</div>
+                <div class="card-tags">
+                    <span class="tag">开发</span>
+                    <span class="tag">代码</span>
+                </div>
+            </a>
+            
+            <a href="https://www.nerdfonts.com" target="_blank" class="card">
+                <div class="card-icon">💻</div>
+                <div class="card-title">Nerd Fonts</div>
+                <div class="card-desc">开发者字体合集</div>
+                <div class="card-tags">
+                    <span class="tag">极客</span>
+                    <span class="tag">字体</span>
+                </div>
+            </a>
+        </div>
+        
+        <footer>
+            <div class="status">
+                <span class="status-dot"></span>
+                <span>系统运行中</span>
+            </div>
+            <p style="margin-top: 10px;">© 2026 Geek Toolbox | Powered by OpenClaw</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Matrix rain effect
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()';
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+        
+        for(let i = 0; i < columns; i++) {
+            drops[i] = 1;
+        }
+        
+        function draw() {
+            ctx.fillStyle = 'rgba(13, 17, 23, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#58a6ff';
+            ctx.font = fontSize + 'px monospace';
+            
+            for(let i = 0; i < drops.length; i++) {
+                const char = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+                
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        
+        setInterval(draw, 33);
+        
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
