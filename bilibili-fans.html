@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B站粉丝排行榜 - 极客工具箱</title>
+    <style>
+        :root {
+            --bg: #0d0d0d;
+            --card-bg: #1a1a1a;
+            --border: #333;
+            --text: #e0e0e0;
+            --text-secondary: #888;
+            --accent: #00ff88;
+            --accent-dim: #00cc6a;
+        }
+        
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: var(--accent);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 14px;
+            border-radius: 8px;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background: var(--accent-dim);
+            transform: translateY(-2px);
+        }
+        
+        .rank-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .rank-item {
+            display: flex;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.2s;
+        }
+        
+        .rank-item:hover {
+            border-color: var(--accent);
+            transform: translateX(8px);
+        }
+        
+        .rank-num {
+            font-size: 24px;
+            font-weight: bold;
+            width: 50px;
+            color: var(--accent);
+        }
+        
+        .rank-num.top3 {
+            color: #ffd700;
+        }
+        
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin-right: 16px;
+            object-fit: cover;
+        }
+        
+        .info {
+            flex: 1;
+        }
+        
+        .name {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .fans {
+            font-size: 18px;
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        .fans-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-left: 4px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--accent);
+            text-decoration: none;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .presets {
+            margin-bottom: 20px;
+        }
+        
+        .presets span {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .preset-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 12px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        
+        .preset-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← 返回工具箱</a>
+        <h1>📊 B站粉丝数查询</h1>
+        <p class="subtitle">输入UP主UID或主页链接查看粉丝数</p>
+        
+        <div class="input-group">
+            <input type="text" id="uidInput" placeholder="输入B站UP主UID（如 946974）或主页链接">
+            <button onclick="addUp()">添加</button>
+        </div>
+        
+        <div class="presets">
+            <span>快速添加：</span>
+            <button class="preset-btn" onclick="addPreset(946974)">影视飓风</button>
+            <button class="preset-btn" onclick="addPreset(1532165)">papi酱</button>
+            <button class="preset-btn" onclick="addPreset(5970160)">小潮院长</button>
+            <button class="preset-btn" onclick="addPreset(4778060)">老番茄</button>
+            <button class="preset-btn" onclick="addPreset(409333498)">老师好我叫何同学</button>
+        </div>
+        
+        <div class="rank-list" id="rankList">
+            <div class="loading">添加UP主查看粉丝数...</div>
+        </div>
+    </div>
+
+    <script>
+        let upList = [];
+        
+        // 从URL提取UID
+        function extractUid(input) {
+            input = input.trim();
+            
+            // 直接是数字
+            if (/^\d+$/.test(input)) {
+                return input;
+            }
+            
+            // 主页链接
+            const match = input.match(/space\.bilibili\.com\/(\d+)/);
+            if (match) {
+                return match[1];
+            }
+            
+            // video链接
+            const videoMatch = input.match(/bilibili\.com\/video\/[A-Za-z0-9]+.*uid=(\d+)/);
+            if (videoMatch) {
+                return videoMatch[1];
+            }
+            
+            return null;
+        }
+        
+        // 获取UP主信息
+        async function fetchUpInfo(uid) {
+            try {
+                const response = await fetch(`https://api.bilibili.com/x/web-interface/card?mid=${uid}&photo=true`);
+                const data = await response.json();
+                
+                if (data.code === 0 && data.data) {
+                    return {
+                        uid: uid,
+                        name: data.data.card.name,
+                        avatar: data.data.card.face,
+                        fans: data.data.card.fans,
+                        desc: data.data.card.sign || '暂无简介'
+                    };
+                }
+            } catch (e) {
+                console.error(e);
+            }
+            return null;
+        }
+        
+        // 格式化粉丝数
+        function formatFans(num) {
+            if (num >= 100000000) {
+                return (num / 100000000).toFixed(1) + '亿';
+            } else if (num >= 10000) {
+                return (num / 10000).toFixed(1) + '万';
+            }
+            return num.toString();
+        }
+        
+        // 渲染列表
+        function render() {
+            const list = document.getElementById('rankList');
+            
+            if (upList.length === 0) {
+                list.innerHTML = '<div class="loading">添加UP主查看粉丝数...</div>';
+                return;
+            }
+            
+            // 按粉丝数排序
+            upList.sort((a, b) => b.fans - a.fans);
+            
+            list.innerHTML = upList.map((up, i) => `
+                <div class="rank-item">
+                    <div class="rank-num ${i < 3 ? 'top3' : ''}">${i + 1}</div>
+                    <img class="avatar" src="${up.avatar}" alt="${up.name}" onerror="this.src='https://api.dicebear.com/7.x/initials/svg?seed=${up.name}'">
+                    <div class="info">
+                        <div class="name">${up.name}</div>
+                        <div class="desc">${up.desc}</div>
+                    </div>
+                    <div>
+                        <span class="fans">${formatFans(up.fans)}</span>
+                        <span class="fans-label">粉丝</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // 添加UP主
+        async function addUp() {
+            const input = document.getElementById('uidInput');
+            const uid = extractUid(input.value);
+            
+            if (!uid) {
+                alert('请输入正确的UID或B站主页链接');
+                return;
+            }
+            
+            // 检查是否已存在
+            if (upList.find(u => u.uid === uid)) {
+                alert('该UP主已在列表中');
+                return;
+            }
+            
+            const info = await fetchUpInfo(uid);
+            if (info) {
+                upList.push(info);
+                input.value = '';
+                render();
+            } else {
+                alert('未找到该UP主，请检查UID是否正确');
+            }
+        }
+        
+        // 预设添加
+        async function addPreset(uid) {
+            if (upList.find(u => u.uid === uid)) {
+                alert('该UP主已在列表中');
+                return;
+            }
+            
+            const info = await fetchUpInfo(uid);
+            if (info) {
+                upList.push(info);
+                render();
+            }
+        }
+        
+        // 回车搜索
+        document.getElementById('uidInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addUp();
+            }
+        });
+        
+        // 页面加载时添加一些预设
+        addPreset(946974);
+        addPreset(1532165);
+        addPreset(5970160);
+    </script>
+</body>
+</html>
